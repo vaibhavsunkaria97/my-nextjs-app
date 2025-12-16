@@ -10,6 +10,7 @@ import { Footer } from '@/components/sections/Footer';
 import { DeckDownload } from '@/components/ui/DeckDownload'; // NEW
 import {DataTravel} from '@/components/sections/DataTravel';
 import {CompetitiveMoat} from '@/components/sections/CompetitiveMoat';
+import {Roadmap} from '@/components/sections/Roadmap';
 
 export default function Home() {
   return (
@@ -23,6 +24,8 @@ export default function Home() {
       <Problem />
 
       <CompetitiveMoat/>
+
+      <Roadmap/>
 
       < DataTravel />
       

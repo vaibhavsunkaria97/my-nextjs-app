@@ -48,7 +48,7 @@ export const Simulation = () => {
   }, []);
 
   return (
-    <section className="py-24 px-6 max-w-7xl mx-auto">
+    <section id = "simulation" className="py-24 px-6 max-w-7xl mx-auto">
       <div className="grid lg:grid-cols-3 gap-12">
         {/* Text Side */}
         <div className="lg:col-span-1 space-y-6">

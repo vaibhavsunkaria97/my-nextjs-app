@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/Badge';
 
 export const CompetitiveMoat = () => {
   return (
-    <section className="py-24 px-6 max-w-7xl mx-auto bg-slate-950">
+    <section id = "moat" className="py-24 px-6 max-w-7xl mx-auto bg-slate-950">
       <div className="text-center mb-16">
         <Badge className="bg-blue-500/10 text-blue-400 border-blue-500/20 mb-4">
           Defensibility
