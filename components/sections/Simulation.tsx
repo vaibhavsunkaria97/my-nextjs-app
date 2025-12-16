@@ -1,88 +1,121 @@
 "use client";
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Activity, Zap } from 'lucide-react';
 import { Badge } from '@/components/ui/Badge';
+import { AreaChart, Area, ResponsiveContainer, YAxis } from 'recharts';
+
+// Simulate live data stream
+const generateData = () => {
+  const points = [];
+  for (let i = 0; i < 20; i++) {
+    const baseLoad = 40 + Math.random() * 60; // Random workload 40-100%
+    points.push({
+      time: i,
+      gpuPower: 95, // Legacy GPU is always near max power (static overhead)
+      ourPower: baseLoad * 0.2 + 10, // Our chip scales linearly with load (10% idle)
+      workload: baseLoad
+    });
+  }
+  return points;
+};
 
 export const Simulation = () => {
-  const [load, setLoad] = useState(30);
-  
-  // Mathematical Logic
-  const gpuPower = 40 + (load * 0.6) + (load > 80 ? 20 : 0); 
-  const iftPower = 5 + (load * 0.35);
-  const tiles = Array.from({ length: 64 });
+  const [data, setData] = useState(generateData());
+  const [currentEfficiency, setCurrentEfficiency] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setData(prev => {
+        const newData = [...prev.slice(1)];
+        const newLoad = 30 + Math.random() * 70; // Varying workload
+        
+        newData.push({
+          time: prev[prev.length - 1].time + 1,
+          gpuPower: 90 + Math.random() * 5, // Competitor stays high
+          ourPower: (newLoad * 0.25) + 5, // We scale down
+          workload: newLoad
+        });
+        
+        // Calculate live efficiency gain for the UI
+        const latest = newData[newData.length-1];
+        setCurrentEfficiency(Math.round(((latest.gpuPower - latest.ourPower) / latest.gpuPower) * 100));
+        
+        return newData;
+      });
+    }, 800); // Update every 800ms
+
+    return () => clearInterval(interval);
+  }, []);
 
   return (
-    <section id="simulation" className="py-12 px-6 max-w-7xl mx-auto">
-      <div className="bg-slate-900 rounded-3xl p-8 border border-slate-800">
-        <div className="text-center mb-12">
-          <Badge>The Solution</Badge>
-          <h2 className="text-3xl md:text-5xl font-bold text-white mb-4">Inference Fabric Tile (IFT)</h2>
-          <p className="text-slate-400 max-w-2xl mx-auto">
-            Drag the slider to simulate datacenter load and compare power consumption.
+    <section className="py-24 px-6 max-w-7xl mx-auto">
+      <div className="grid lg:grid-cols-3 gap-12">
+        {/* Text Side */}
+        <div className="lg:col-span-1 space-y-6">
+          <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/20">Live Simulation</Badge>
+          <h2 className="text-4xl font-bold text-white">Dynamic Power Gating</h2>
+          <p className="text-slate-400 leading-relaxed">
+            Watch how legacy chips (Red) burn power waiting for work, while our Energy Fabric (Green) scales power usage instantly to match the workload.
           </p>
+          
+          <div className="bg-slate-900/50 p-6 rounded-xl border border-slate-800">
+            <div className="text-sm text-slate-500 mb-1">Real-Time Efficiency Gain</div>
+            <div className="text-5xl font-mono font-bold text-emerald-400">{currentEfficiency}%</div>
+            <div className="text-sm text-emerald-500/80 mt-2 flex items-center">
+              <Zap className="w-4 h-4 mr-1" /> Less Power Used
+            </div>
+          </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* CONTROLS */}
-          <div className="col-span-1 bg-slate-950 p-6 rounded-xl border border-slate-800 flex flex-col justify-center">
-            <label className="text-white font-semibold mb-4 flex justify-between">
-              <span>Inference Request Load</span>
-              <span className="text-emerald-400">{load}%</span>
-            </label>
-            <input 
-              type="range" min="0" max="100" value={load} 
-              onChange={(e) => setLoad(parseInt(e.target.value))}
-              className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-emerald-500 mb-8"
-            />
-            
-            <div className="space-y-6">
-              <div className="flex justify-between items-center p-4 bg-slate-900 rounded-lg border border-red-900/30">
-                <div>
-                  <div className="text-slate-400 text-sm">Legacy GPU Power</div>
-                  <div className="text-2xl font-bold text-red-400">{Math.round(gpuPower)} Watts</div>
-                </div>
-                <Activity className="text-red-500 opacity-50" />
-              </div>
-
-              <div className="flex justify-between items-center p-4 bg-slate-900 rounded-lg border border-emerald-900/30">
-                <div>
-                  <div className="text-slate-400 text-sm">IFT Fabric Power</div>
-                  <div className="text-2xl font-bold text-emerald-400">{Math.round(iftPower)} Watts</div>
-                </div>
-                <Zap className="text-emerald-500 opacity-50" />
-              </div>
+        {/* Graph Side */}
+        <div className="lg:col-span-2 bg-slate-950 p-6 rounded-2xl border border-slate-800 relative overflow-hidden">
+          <div className="absolute top-6 right-6 flex gap-6 text-sm font-bold z-10">
+            <div className="flex items-center text-red-400">
+              <div className="w-3 h-3 bg-red-400 rounded-full mr-2 animate-pulse" /> Legacy GPU
+            </div>
+            <div className="flex items-center text-emerald-400">
+              <div className="w-3 h-3 bg-emerald-400 rounded-full mr-2 animate-pulse" /> Our Fabric
             </div>
           </div>
 
-          {/* VISUALIZATION: LEGACY */}
-          <div className="col-span-1 flex flex-col items-center">
-            <h3 className="text-slate-400 mb-4 uppercase tracking-widest text-sm">Monolithic GPU</h3>
-            <div className="w-64 h-64 bg-slate-800 rounded-lg border-2 border-slate-700 relative overflow-hidden transition-all duration-300"
-                 style={{ boxShadow: `0 0 ${load / 2}px ${load / 5}px rgba(239, 68, 68, 0.3)` }}>
-              <div 
-                className="absolute inset-0 bg-red-500 transition-opacity duration-500"
-                style={{ opacity: 0.2 + (load / 200) }} 
-              />
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="text-red-200 font-mono text-xs p-2 text-center">High Static Leakage</span>
-              </div>
-            </div>
+          <div className="h-[350px] w-full mt-8">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={data}>
+                <defs>
+                  <linearGradient id="colorGpu" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f87171" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#f87171" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="colorOur" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#10b981" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <YAxis hide domain={[0, 100]} />
+                <Area 
+                  type="monotone" 
+                  dataKey="gpuPower" 
+                  stroke="#f87171" 
+                  strokeWidth={3}
+                  fillOpacity={1} 
+                  fill="url(#colorGpu)" 
+                  isAnimationActive={false}
+                />
+                <Area 
+                  type="monotone" 
+                  dataKey="ourPower" 
+                  stroke="#10b981" 
+                  strokeWidth={3}
+                  fillOpacity={1} 
+                  fill="url(#colorOur)" 
+                  isAnimationActive={false}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
-
-          {/* VISUALIZATION: IFT */}
-          <div className="col-span-1 flex flex-col items-center">
-            <h3 className="text-slate-400 mb-4 uppercase tracking-widest text-sm">Inference Fabric (Tiles)</h3>
-            <div className="w-64 h-64 grid grid-cols-8 gap-0.5 bg-slate-950 p-1 rounded-lg border-2 border-emerald-900/50">
-              {tiles.map((_, i) => {
-                const isActive = i < (load / 100) * 64;
-                return (
-                  <div 
-                    key={i}
-                    className={`rounded-sm transition-all duration-300 ${isActive ? 'bg-emerald-500 shadow-[0_0_5px_rgba(16,185,129,0.8)]' : 'bg-slate-900'}`}
-                  />
-                );
-              })}
-            </div>
+          
+          <div className="absolute bottom-4 left-0 w-full flex justify-center text-slate-500 text-xs tracking-widest uppercase">
+            Live Inference Workload (Time)
           </div>
         </div>
       </div>

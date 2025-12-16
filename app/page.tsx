@@ -5,9 +5,10 @@ import { Simulation } from '@/components/sections/Simulation';
 import { Financials } from '@/components/sections/Financials'; // NEW
 import { MarketDeepDive } from '@/components/sections/MarketDeepDive'; // NEW
 import { Technology } from '@/components/sections/Technology';
-import  Market from '@/components/sections/Market';
+import {Market}  from '@/components/sections/Market';
 import { Footer } from '@/components/sections/Footer';
 import { DeckDownload } from '@/components/ui/DeckDownload'; // NEW
+import {DataTravel} from '@/components/sections/DataTravel';
 
 export default function Home() {
   return (
@@ -19,6 +20,8 @@ export default function Home() {
       
       {/* Slide 2 */}
       <Problem />
+
+      < DataTravel />
       
       {/* Slide 3: Deep Market Data */}
       <MarketDeepDive />

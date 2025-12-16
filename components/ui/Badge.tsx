@@ -1,7 +1,17 @@
-import React from 'react';
+import React from "react";
 
-export const Badge = ({ children }: { children: React.ReactNode }) => (
-  <span className="inline-block px-3 py-1 mb-4 text-xs font-semibold tracking-wider text-emerald-400 uppercase bg-emerald-900/30 rounded-full border border-emerald-500/30">
-    {children}
-  </span>
-);
+// We add 'className' to the interface so TypeScript knows it is allowed
+interface BadgeProps {
+  children: React.ReactNode;
+  className?: string; 
+}
+
+export const Badge = ({ children, className = "" }: BadgeProps) => {
+  return (
+    <span 
+      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${className}`}
+    >
+      {children}
+    </span>
+  );
+};
