@@ -9,6 +9,7 @@ import {Market}  from '@/components/sections/Market';
 import { Footer } from '@/components/sections/Footer';
 import { DeckDownload } from '@/components/ui/DeckDownload'; // NEW
 import {DataTravel} from '@/components/sections/DataTravel';
+import {CompetitiveMoat} from '@/components/sections/CompetitiveMoat';
 
 export default function Home() {
   return (
@@ -20,6 +21,8 @@ export default function Home() {
       
       {/* Slide 2 */}
       <Problem />
+
+      <CompetitiveMoat/>
 
       < DataTravel />
       
